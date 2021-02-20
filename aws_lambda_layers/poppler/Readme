@@ -1,0 +1,4 @@
+Follow this tutorial
+https://www.petewilcock.com/using-poppler-pdftotext-and-other-custom-binaries-on-aws-lambda/
+but add all binaries from docker's /usr/local/bin to package.zip
+then deploy as lambda layer to aws

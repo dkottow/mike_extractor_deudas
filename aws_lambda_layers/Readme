@@ -1,0 +1,17 @@
+How to create a Python layer in AWS Lambda
+https://medium.com/brlink/how-to-create-a-python-layer-in-aws-lambda-287235215b79
+
+1) Instalar librerias Python que queremos incluir en la capa Lambda en directory ./python (ejemplo pandas)
+$ cd python
+$ pip install -t pandas .
+
+2) Eliminar dependencias "duplicadas" simplemente borrando los directorios que no se desean incluir. (ejemplo numpy)
+$ cd python
+$ rm -rf numpy*
+
+
+3) Crear comprimido zip desde directory padre
+$ zip -r pandas.zip .
+
+4) Subir el zip como Layer en AWS Lambda
+
