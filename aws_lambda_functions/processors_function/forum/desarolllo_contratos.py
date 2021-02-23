@@ -86,7 +86,7 @@ class DDATablesProcessor:
         tabla_pagos = tabla_pagos.copy()
         for idx, row in tabla_pagos.iterrows():
 
-            # Si encuentro una fila que tenga 1a columna vacia,
+            # Si encuentro una fila que tenga la primera columna vacia,
             # elimino esta y todas las que vengan.
             if row["cuota"].strip() == "":
                 tabla_pagos = tabla_pagos.iloc[0:idx, :]
@@ -151,8 +151,9 @@ class DDATablesProcessor:
 
     def get_valor_cuota(self) -> Union[int, None]:
         try:
-            ultima_cuota = self.tabla_pagos.loc[0, "valor_cuota"]
-            return int(ultima_cuota.replace(".", ""))
+            valor_cuota = self.tabla_pagos["valor_cuota"].mode()[0] # cuota inicial puede ser distinta al resto.
+            #valor_cuota = self.tabla_pagos.loc[0, "valor_cuota"]
+            return int(valor_cuota.replace(".", ""))
         except Exception as e:
             logging.error("{} error: {}".format(DDATablesProcessor.get_valor_cuota.__qualname__, e))
             if "Valor Cuota" not in self.errors:
@@ -161,8 +162,8 @@ class DDATablesProcessor:
 
     def get_total_pagare(self) -> Union[int, None]:
         try:
-            ultima_cuota = self.tabla_pagos.loc[0, "monto_actual"]
-            return int(ultima_cuota.replace(".", ""))
+            monto_actual = self.tabla_pagos.loc[0, "monto_actual"]
+            return int(monto_actual.replace(".", ""))
         except Exception as e:
             logging.error("{} error: {}".format(DDATablesProcessor.get_total_pagare.__qualname__, e))
             self.errors.append("Total Pagaré")
