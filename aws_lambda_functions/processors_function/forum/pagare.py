@@ -52,31 +52,26 @@ class PagareTextProcessor():
             self.errors.append('Número Vendedor')
             return None
 
-    def get_numero_documento_old(self) -> Union[float, None]:
+    def get_numero_documento(self) -> Union[float, None]:
         try:
-            pattern = re.compile(r"\bn.\s*?\d{6,8}\b")
+            pattern = re.compile(r"\bn.\s*?\d{7}\b")
             found = pattern.findall(self.text)
 
             if len(found) > 0:
                 return parse_number(found[0])
 
             # segundo método, menos robusto:
-            else:
-                pattern = re.compile(r"(?<=n°)(.*?)(?=y)")
-                found = pattern.findall(self.text)
-                return parse_number(found[0])
-
-        except Exception as e:
-            logging.error('{} error: {}'.format(
-                PagareTextProcessor.get_numero_documento.__qualname__, e))
-            self.errors.append('Numero de Documento')
-            return None
-
-    def get_numero_documento(self) -> Union[float, None]:
-        try:
+            # else:
+            #     pattern = re.compile(r"(?<=n°)(.*?)(?=y)")
+            #     found = pattern.findall(self.text)
+            #     return parse_number(found[0])
+           
+           # ultima opcion, sin la N 
             pattern = re.compile(r"\b([12]\d{6})\b") #cualquier numero entre 1000000 y 2999999 rodeado por espacio
             found = pattern.search(self.text)
             return parse_number(found.group(1))
+                
+
         except Exception as e:
             logging.error('{} error: {}'.format(
                 PagareTextProcessor.get_numero_documento.__qualname__, e))
