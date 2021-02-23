@@ -36,6 +36,10 @@ class PagareTextProcessor():
         else:
             self.deudor_info_text = self.text[5600:]
 
+        #extraer tabla de cuotas como 'nn dd/mm/yyyy $$$.$$$.$$$'
+        searched = re.compile(r"(\d{1,2})\s(\d{1,2}/\d{1,2}/\d{4})\s([0-9]+(?:\.[0-9]+)?(?:\.[0-9]+)?)")
+        self.tabla_cuotas = searched.findall(self.text)
+
         self.errors: List[str] = []
 
     def get_vendedor(self) -> Union[float, None]:
@@ -120,41 +124,6 @@ class PagareTextProcessor():
             logging.error('{} error: {}'.format(
                 PagareTextProcessor.get_nombre.__qualname__, e))
             self.errors.append('Nombre')
-            return None
-
-    def get_fecha_pago_primera_cuota(self) -> Union[datetime.datetime, None]:
-        try:
-            pattern = re.compile(r"el día \d{1,2} de \w+ de \d{1,4}")
-            found = pattern.findall(self.text)
-
-            date_str = found[0]
-            date_str = date_str.replace('el día', '').replace(' ', '')
-            date_splitted = date_str.split('de')
-
-            day = date_splitted[0]
-            month = MONTHS[date_splitted[1]]
-            year = date_splitted[2]
-
-            parsed_date = datetime.datetime(year=int(year),
-                                            month=int(month),
-                                            day=int(day))
-            return parsed_date
-
-        except Exception as e:
-            logging.error('{} error: {}'.format(
-                PagareTextProcessor.get_fecha_pago_primera_cuota.__qualname__, e))
-        self.errors.append('Fecha Pago Primera Cuota')
-        return None
-
-    def get_dia_de_pago(self) -> Union[float, None]:
-        try:
-            pattern = re.compile(r"(?<=días)\s*\d{1,2}\s*(?=de)")
-            found = pattern.findall(self.text)
-            return parse_number(found[0])
-        except Exception as e:
-            logging.error('{} error: {}'.format(
-                PagareTextProcessor.get_dia_de_pago.__qualname__, e))
-            self.errors.append('Día de Pago')
             return None
 
     def get_tasa_interes(self) -> Union[str, None]:
@@ -267,6 +236,88 @@ class PagareTextProcessor():
         self.errors.append('Fecha Suscripcion')
         return None
 
+    def get_fecha_pago_primera_cuota(self) -> Union[datetime.datetime, None]:
+        try:
+            pattern = re.compile(r"el d[íi]a (\d{1,2}) de (\w+) de (\d{4})")
+            found = pattern.search(self.text)
+
+            day = found.group(1)
+            month = MONTHS[found.group(2)]
+            year = found.group(3)
+
+            parsed_date = datetime.datetime(year=int(year),
+                                            month=int(month),
+                                            day=int(day))
+            return parsed_date
+
+        except Exception as e:
+            logging.error('{} error: {}'.format(
+                PagareTextProcessor.get_fecha_pago_primera_cuota.__qualname__, e))
+            self.errors.append('Fecha Pago Primera Cuota')
+            return None
+
+    def get_dia_pago(self) -> Union[int, None]:
+        try:
+            pattern = re.compile(r"restantes los d[íi]as (\d{1,2})")
+            found = pattern.search(self.text)
+
+            day = int(found.group(1))
+            return day
+
+        except Exception as e:
+            logging.error('{} error: {}'.format(
+                PagareTextProcessor.get_dia_pago.__qualname__, e))
+            self.errors.append("Día Pago")
+            return None
+
+    def get_total_pagare(self) -> Union[int, None]:
+        try:
+            pattern = re.compile(r'la suma de \$([0-9]+(?:\.[0-9]+)?(?:\.[0-9]+)?)')
+            found = pattern.search(self.text)
+
+            if not found: # try to find just the first dollar figure
+                pattern = re.compile(r'\$([0-9]+(?:\.[0-9]+)?(?:\.[0-9]+)?)')
+                found = pattern.search(self.text)
+            
+            
+            total = int(found.group(1).replace('.', ''))
+            return total
+            
+        except Exception as e:
+            logging.error('{} error: {}'.format(
+                PagareTextProcessor.get_total_pagare.__qualname__, e))
+            self.errors.append("Total Pagaré")
+            return None
+
+    def get_valor_cuota(self) -> Union[int, None]:
+        try:
+            cuotas = [int(t[2].replace('.','')) for t in self.tabla_cuotas]
+            return max(set(cuotas), key=cuotas.count)
+            
+        except Exception as e:
+            logging.error('{} error: {}'.format(
+                PagareTextProcessor.get_valor_cuota.__qualname__, e))
+            if "Valor Cuota" not in self.errors:
+                self.errors.append("Valor Cuota")
+            return None
+
+    def get_valor_ultima_cuota(self) -> Union[int, None]:
+        try:
+            last = str(max(int(t[0]) for t in self.tabla_cuotas))
+            ultima_cuota = next(t for t in self.tabla_cuotas if t[0] == last)
+            valor_ultima_cuota = int(ultima_cuota[2].replace('.', ''))
+
+            if valor_ultima_cuota > self.get_valor_cuota():
+                return valor_ultima_cuota
+            return None
+            
+        except Exception as e:
+            logging.error('{} error: {}'.format(
+                PagareTextProcessor.get_valor_ultima_cuota.__qualname__, e))
+            self.errors.append("Valor Ultima Cuota")
+            return None
+        
+
 class PagareProcessor(Processor):
     def process_response(self, response: Dict[str, Any], parsed_key: Dict[str, str]) -> pd.DataFrame:
 
@@ -285,10 +336,12 @@ class PagareProcessor(Processor):
             'Nº Cuotas': self.processed_text.get_num_cuotas(),
             'Tasa de Interes': self.processed_text.get_tasa_interes(),
             'fecha Suscrfipción': self.processed_text.get_fecha_suscripcion(),
+            "Valor Cuota": self.processed_text.get_valor_cuota(),
+            "Total Pagaré": self.processed_text.get_total_pagare(),
+            "Fecha Pago Primera Cuota": self.processed_text.get_fecha_pago_primera_cuota(),
+            "Día de pago": self.processed_text.get_dia_pago(),
+            "Valor Última Cuota": self.processed_text.get_valor_ultima_cuota(),
             'Nombre Documento': parsed_key['filename_full'],
             'Errores': ', '.join(self.processed_text.errors),
-            # 'Día de pago': self.processed_text.get_dia_de_pago(),
-            # 'Fecha Pago Primera Cuota':
-            # self.processed_text.get_fecha_pago_primera_cuota(),
         }
         return pd.DataFrame([row])

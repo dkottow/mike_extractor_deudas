@@ -15,7 +15,7 @@ def test_processor(processor_class, examples):
     for idx, example in enumerate(examples):
         results = processor.process_response(example["response"], parse_mike_key(example["response"]["key"]))
         results = results.to_dict(orient="records")[0]
-        print(results, ' VS TRUE ', example["expected_results"])
+        print(results, '\nTRUE\n', example["expected_results"])
         assert example["expected_results"] == results
         print(f"\033[92m\tExample {idx + 1} / {len(examples)} - OK\033[0m")
 
