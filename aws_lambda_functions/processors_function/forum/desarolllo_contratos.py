@@ -93,7 +93,6 @@ class DDATablesProcessor:
                 break
         return tabla_pagos
 
-
     # Obtener filas
 
     def get_fila_ultima_cuota_pagada(self) -> Union[pd.Series, None]:
@@ -151,8 +150,8 @@ class DDATablesProcessor:
 
     def get_valor_cuota(self) -> Union[int, None]:
         try:
-            valor_cuota = self.tabla_pagos["valor_cuota"].mode()[0] # cuota inicial puede ser distinta al resto.
-            #valor_cuota = self.tabla_pagos.loc[0, "valor_cuota"]
+            valor_cuota = self.tabla_pagos["valor_cuota"].mode()[0]  # cuota inicial puede ser distinta al resto.
+            # valor_cuota = self.tabla_pagos.loc[0, "valor_cuota"]
             return int(valor_cuota.replace(".", ""))
         except Exception as e:
             logging.error("{} error: {}".format(DDATablesProcessor.get_valor_cuota.__qualname__, e))
@@ -214,10 +213,10 @@ class DDATablesProcessor:
         try:
             if self.fila_cuoton is not None:
                 cuota = self.get_valor_cuota()
-                #print(self.fila_cuoton["valor_cuota"].item())
+                # print(self.fila_cuoton["valor_cuota"].item())
                 ultima_cuota = parse_number(self.fila_cuoton["valor_cuota"].item())
-                if ultima_cuota > cuota: 
-                    return ultima_cuota 
+                if ultima_cuota > cuota:
+                    return ultima_cuota
             return None
         except Exception as e:
             logging.error("{} error: {}".format(DDATablesProcessor.get_valor_ultima_cuota.__qualname__, e))
@@ -317,13 +316,13 @@ class DesarrolloContratosProcessor(Processor):
             "Última Cuota Pagada": self.processed_tables.get_ultima_cuota_pagada(),
             "Cuota Impaga": self.processed_tables.get_primera_cuota_impaga(),
             # 'Tasa de Interes': self.processed_text.get_tasa_interes(),
-            "Valor Cuota": self.processed_tables.get_valor_cuota(),
-            "Total Pagaré": self.processed_tables.get_total_pagare(),
+            # "Valor Cuota": self.processed_tables.get_valor_cuota(),
+            # "Total Pagaré": self.processed_tables.get_total_pagare(),
             "Monto Impago": self.processed_tables.get_monto_impago(),
-            "Fecha Pago Primera Cuota": self.processed_tables.get_fecha_pago_primera_cuota(),
-            "Día de pago": self.processed_tables.get_dia_pago(),
+            # "Fecha Pago Primera Cuota": self.processed_tables.get_fecha_pago_primera_cuota(),
+            # "Día de pago": self.processed_tables.get_dia_pago(),
             "Fecha Mora": self.processed_tables.get_fecha_mora(),
-            "Valor Última Cuota": self.processed_tables.get_valor_ultima_cuota(),
+            # "Valor Última Cuota": self.processed_tables.get_valor_ultima_cuota(),
             "Nombre Documento": parsed_key["filename_full"],
         }
 

@@ -68,6 +68,28 @@ EVENT_EXAMPLE_FROM_SQS = {
 }
 
 
+EVENT_EXAMPLE = {
+    "Records": [
+        {
+            "messageId": "e1490684-6b22-493e-8766-736ffb5f346d",
+            "receiptHandle": "AQEB0n03vAUee9BaEplXxETn8/6g3/aH5pSmMwyEgDNVL5UEjgRuk916VB4zeZIq5FlOPXkAmwLw+vtrMvjzokkUhoauazfwgY0hQDVeBxtLJu/vsxGWkSrIUDMt+mLu625vNZmp+qsMLUxhFWDJIuuZgEZp3lfI+AEsf4jlFSepq2Zgv4t5H9jyi7ytmC78whHYiUTsXSCCVKsYbtdCtWTset0+LJVHbuMZOVyY+q8NjmBAIK9oGaM9lv6F0/82pxOKxYJO2cZStLMH0SxnFy8duhCp5Cm+6wlXBZiQ8y8jyT4sBby+PEKlexf10RZMhUqk/KOzijaH7q1IkAQ+aYBqxC0vhby45DqroLet0dJIZkfUCwdGCOIRFaCV23Rwm019KXSarcKaVe3XFhOFlJ5/FA==",
+            "body": '{"version":"1.0","timestamp":"2021-02-23T19:09:18.222Z","requestContext":{"requestId":"10a8381a-ef49-4ea5-be3d-8ef063d911f6","functionArn":"arn:aws:lambda:us-east-2:454177333545:function:Mike_OCR_Map:$LATEST","condition":"Success","approximateInvokeCount":1},"requestPayload":{"Records":[{"eventVersion":"2.1","eventSource":"aws:s3","awsRegion":"us-east-2","eventTime":"2021-02-23T19:08:24.330Z","eventName":"ObjectCreated:Put","userIdentity":{"principalId":"AWS:AIDAWTPYUEEU4Q7UDH44Z"},"requestParameters":{"sourceIPAddress":"18.220.213.1"},"responseElements":{"x-amz-request-id":"PPF9FFHDYTJTRRDS","x-amz-id-2":"jml7XSfOFcYp6K7HlsFRVvx21ZM9TNJGKXflwOQgossjU5cmLK5Y82/xlHIftAMHdJpXXpJA+Sntf5EsBRUKr9pb+rNvg4qicVJLQ2Odkso="},"s3":{"s3SchemaVersion":"1.0","configurationId":"de2b518a-0ddb-44e7-8025-9bb15c3b0723","bucket":{"name":"textract-console-us-east-2-7e1edcda-ec50-4013-9762-a06e7b200006","ownerIdentity":{"principalId":"AFTBJ9N16F5MT"},"arn":"arn:aws:s3:::textract-console-us-east-2-7e1edcda-ec50-4013-9762-a06e7b200006"},"object":{"key":"ExtractorDeudas/Entrada/Forum/2021-02-23T19_08_27_740174/23-02.zip","size":24677042,"eTag":"d0d065a8ef4c78d0877e5dde337724db","sequencer":"00603552ABD12E3295"}}}]},"responseContext":{"statusCode":200,"executedVersion":"$LATEST"},"responsePayload":{"success": true, "processable_files": ["ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/DANNY_GUTIERREZ_ANDRADE_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/DANNY_GUTIERREZ_ANDRADE_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/DANNY_GUTIERREZ_ANDRADE_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/GUILLERMO_CACERES_LALUT_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/GUILLERMO_CACERES_LALUT_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/GUILLERMO_CACERES_LALUT_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/HUGO_PAVEZ_LOPEZ_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/HUGO_PAVEZ_LOPEZ_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/HUGO_PAVEZ_LOPEZ_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/ISABEL_DIAZ_FUENTEALBA_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/ISABEL_DIAZ_FUENTEALBA_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/ISABEL_DIAZ_FUENTEALBA_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/ISMAEL_YEVENES_LOPEZ_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/ISMAEL_YEVENES_LOPEZ_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/JOSE_SILVA_CERDA_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/JOSE_SILVA_CERDA_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/JOSE_SILVA_CERDA_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/JOSE_VALENCIA_BUSTOS_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/JOSE_VALENCIA_BUSTOS_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/JOSE_VALENCIA_BUSTOS_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/MARCO_RIOS_CONTRERAS_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/MARCO_RIOS_CONTRERAS_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/MARIA_GODOY_PERALTA_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/MARIA_GODOY_PERALTA_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/MARIA_VALENZUELA_CISTERNA_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/MARIA_VILLARROEL_TORO_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/MARIA_VILLARROEL_TORO_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/MARIA_VILLARROEL_TORO_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/PABLO_ERVIA_ILLANES_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/PABLO_ERVIA_ILLANES_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/PABLO_ERVIA_ILLANES_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/PABLO_MUNOZ_GODOY_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/SERV_DE_LIMP_Y_SANITIZACION_RAFAEL_BARRIA_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/SERVICIOS_DE_PUBLICIDAD_LIMPIEZAS_Y_SANITIZACION_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/SERVICIOS_DE_PUBLICIDAD_LIMPIEZAS_Y_SANITIZACION_RAFAEL_RAMON_BARRIA_CHEUQUELAF_EIRL_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/SOCIEDAD_COMERCIAL_RIOS_LIMITADA_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/TERESA_ESCOBAR_MACHUCA_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/TERESA_ESCOBAR_MACHUCA_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/TERESA_ESCOBAR_MACHUCA_-_TABLA.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/VICTOR_CASTILLO_ORTEGA_-_CAV.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/VICTOR_CASTILLO_ORTEGA_-_PAGARE.pdf", "ExtractorDeudas/Archivo/Forum/2021-02-23T19_08_27_740174/VICTOR_CASTILLO_ORTEGA_-_TABLA.pdf"], "unprocessable_files": [], "empresa": "Forum", "folder_datetime": "2021-02-23T19_08_27_740174", "email": "", "number_of_retries": 0}}',
+            "attributes": {
+                "ApproximateReceiveCount": "1",
+                "SentTimestamp": "1614107358261",
+                "SenderId": "AROAWTPYUEEUQM3LJFI6F:awslambda_869_20210223190918227",
+                "ApproximateFirstReceiveTimestamp": "1614107478261",
+            },
+            "messageAttributes": {},
+            "md5OfBody": "5953802854ce9602ff8575b53e2d8077",
+            "eventSource": "aws:sqs",
+            "eventSourceARN": "arn:aws:sqs:us-east-2:454177333545:Mike_OCR_Reduce_Queue",
+            "awsRegion": "us-east-2",
+        }
+    ]
+}
+
+
 def generate_event(
     processable_files: List[str],
     unprocessable_files: List[str],
@@ -154,11 +176,11 @@ def test_reduce_function():
         "results_file": "https://textract-console-us-east-2-7e1edcda-ec50-4013-9762-a06e7b200006.s3.us-east-2.amazonaws.com/ExtractorDeudas/Salida/Forum/2021-01-25T12_45_44_250555/Resultados_OCR_2021-01-25T12_45_44_250555.xlsx",
         "success": True,
     }
-    result = lambda_handler(event, "")
+    result = lambda_handler(EVENT_EXAMPLE, "")
     assert result == expected_output
 
 
 if __name__ == "__main__":
-    test_generate_event()
+    # test_generate_event()
     test_reduce_function()
     print("\033[92mAll test OK\033[0m")

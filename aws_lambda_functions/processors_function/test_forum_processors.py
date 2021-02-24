@@ -15,8 +15,17 @@ def test_processor(processor_class, examples):
     for idx, example in enumerate(examples):
         results = processor.process_response(example["response"], parse_mike_key(example["response"]["key"]))
         results = results.to_dict(orient="records")[0]
-        print(results, '\nTRUE\n', example["expected_results"])
-        assert example["expected_results"] == results
+
+        print(results, '\nEXPECTED VALUES\n', example["expected_results"])
+        for k in results:
+            if k == 'Errores': continue # dkottow - temp until we allow extracting attrs from more than 1 doc
+            msg = f"\nError en {k}.\n" \
+                + f"\tExpected: {example['expected_results'][k]}\n" \
+                + f"\tGot: {results[k]}\n"
+                
+            assert example["expected_results"][k] == results[k], msg
+        #assert example["expected_results"] == results
+        
         print(f"\033[92m\tExample {idx + 1} / {len(examples)} - OK\033[0m")
 
 

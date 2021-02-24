@@ -384,6 +384,10 @@ def send_email(recipient: str, body: str):
         logger.info("Email sent!")
 
 
+def flat_list(t: List) -> List:
+    return [item for sublist in t for item in sublist]
+
+
 def lambda_handler(event, context) -> Dict:
 
     s3 = boto3.client("s3")

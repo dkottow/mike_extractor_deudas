@@ -28,19 +28,32 @@ class PagareTextProcessor():
     def __init__(self, text: str):
         self.text = text.lower()
 
-        # Extraer el texto desde la sección de información del deudor:
-        # es decir, desde razón social hasta que termina el pagaré.
-        searched = re.search(r'\b(razón social)\b', self.text)
-        if searched is not None:
-            self.deudor_info_text = self.text[searched.start():]
-        else:
-            self.deudor_info_text = self.text[5600:]
-
-        #extraer tabla de cuotas como 'nn dd/mm/yyyy $$$.$$$.$$$'
-        searched = re.compile(r"(\d{1,2})\s(\d{1,2}/\d{1,2}/\d{4})\s([0-9]+(?:\.[0-9]+)?(?:\.[0-9]+)?)")
-        self.tabla_cuotas = searched.findall(self.text)
+        #defaults
+        self.seccion_deudor = self.text[5600:] #dkottow ?
+        self.seccion_representante_legal = None
+        self.seccion_aval = None
 
         self.errors: List[str] = []
+
+        # Extraer el texto desde la sección de información del deudor:
+        # es decir, desde razón social hasta que termina el pagaré.
+        found = re.search(r"\braz[óo]n social\b", self.text)
+        if found is not None:
+            self.seccion_deudor = self.text[found.start():]
+
+        #extraer tabla de cuotas como 'nn dd/mm/yyyy $$$.$$$.$$$'
+        pattern = re.compile(r"(\d{1,2})\s(\d{1,2}/\d{1,2}/\d{4})\s([0-9]+(?:\.[0-9]+)?(?:\.[0-9]+)?)")
+        self.tabla_cuotas = pattern.findall(self.text)
+
+        # Obtener sección representante legal
+        found = re.search(r"(?<=legal)(.+?)(?=domici)", self.seccion_deudor)
+        if found is not None:
+            self.seccion_representante_legal = self.seccion_deudor[found.start():]
+
+        # Obtener sección aval
+        found = re.search(r"\bemanan\sdel\spresente\spagar[eé]\b", self.seccion_deudor)
+        if found is not None:
+            self.seccion_aval = self.seccion_deudor[found.start():]
 
     def get_vendedor(self) -> Union[float, None]:
         try:
@@ -110,7 +123,7 @@ class PagareTextProcessor():
     def get_nombre(self) -> Union[float, None]:
         try:
             pattern = re.compile(r"(?<=social)(.*?)(?=rut)")
-            found = pattern.findall(self.deudor_info_text)
+            found = pattern.findall(self.seccion_deudor)
             nombre = found[0]
 
             # Fix "domiciliado en" aparece producto de una mala detección.
@@ -159,14 +172,14 @@ class PagareTextProcessor():
 
     def get_representante_legal(self) -> Union[float, None]:
         try:
-            # Obtener sección representante legal
-            pattern_1 = re.compile(r"(?<=legal)(.+?)(?=domici)")
-            representante_section = pattern_1.findall(self.deudor_info_text)[0]
-
+            if self.seccion_representante_legal is None:
+                return None
+                
             pattern_2 = re.compile(r"(?<=:)(.+?)(?=rut)")
-            found = pattern_2.findall(representante_section)
+            found = pattern_2.findall(self.seccion_representante_legal)
             nombre = found[0].replace(':', '').strip().title()
             return nombre.title()
+            
         except Exception as e:
             logging.error('{} error: {}'.format(
                 PagareTextProcessor.get_representante_legal.__qualname__, e))
@@ -175,13 +188,12 @@ class PagareTextProcessor():
 
     def get_rut_representante_legal(self) -> Union[float, None]:
         try:
-            # Obtener sección representante legal
-            pattern_1 = re.compile(r"(?<=legal)(.+?)(?=domici)")
-            representante_section = pattern_1.findall(self.deudor_info_text)[0]
+            if self.seccion_representante_legal is None:
+                return None
 
             # Obtener rut
             pattern_2 = re.compile(r"(?<=rut:).+\b")
-            found = pattern_2.findall(representante_section)
+            found = pattern_2.findall(self.seccion_representante_legal)
 
             return parse_rut(found[0])
 
@@ -195,17 +207,14 @@ class PagareTextProcessor():
         try:
             # Caso 1: el pagaré tiene representante legal
             rut_pattern_1 = re.compile(r"(?<=rut)(.+?)(?=representante)")
-            found = rut_pattern_1.findall(self.deudor_info_text)
+            found = rut_pattern_1.findall(self.seccion_deudor)
 
             if len(found) > 0:
-                # return found[0].split('-')[0].replace(':',
-                #                                       '').replace(' ',
-                #                                                   '').strip().upper()
                 return parse_rut(found[0])
 
             # Caso 2: El pagaré es de una persona natural
             rut_pattern_2 = re.compile(r"(?<=rut)(.*?)(?=domici)")
-            found = rut_pattern_2.findall(self.deudor_info_text)
+            found = rut_pattern_2.findall(self.seccion_deudor)
             # return found[0].split('-')[0].replace(':', '').strip().upper()
             return parse_rut(found[0])
 
@@ -316,7 +325,84 @@ class PagareTextProcessor():
                 PagareTextProcessor.get_valor_ultima_cuota.__qualname__, e))
             self.errors.append("Valor Ultima Cuota")
             return None
+
+    def get_aval_nombre(self, idx) -> Union[str, None]:
+        try:
+            if self.seccion_aval is None: 
+                return None
+
+            pattern = re.compile(r'\braz[oó]n social:\s((?:\w+\s)+)')
+            found = pattern.findall(self.seccion_aval)
+
+            if idx >= len(found): 
+                return None
         
+            return found[idx].strip().title()
+            
+        except Exception as e:
+            logging.error('{} error: {}'.format(
+                PagareTextProcessor.get_aval_nombre.__qualname__, e))
+            self.errors.append("Codeudor")
+            return None
+        
+    def get_aval_rut(self, idx) -> Union[str, None]:
+        try:
+            if self.seccion_aval is None: 
+                return None
+
+            pattern = re.compile(r'\brut:\s([0-9k.\-.k]+)')
+            found = pattern.findall(self.seccion_aval)
+
+            if idx >= len(found): 
+                return None
+        
+            return parse_rut(found[idx].strip())
+
+        except Exception as e:
+            logging.error('{} error: {}'.format(
+                PagareTextProcessor.get_aval_rut.__qualname__, e))
+            self.errors.append("Rut Codeudor")
+            return None
+        
+    def get_aval_domicilio(self, idx) -> Union[str, None]:
+        try:
+            if self.seccion_aval is None: 
+                return None
+
+            #pattern = re.compile(r'\ben calle:\s((?:[\w.]+\s)+)')
+            pattern = re.compile(r"(?<=\ben calle:\s)([^-_]+?)\s(?=comuna)")
+            found = pattern.findall(self.seccion_aval)
+
+            if idx >= len(found): 
+                return None
+
+            return found[idx].strip().title()
+
+        except Exception as e:
+            logging.error('{} error: {}'.format(
+                PagareTextProcessor.get_aval_domicilio.__qualname__, e))
+            self.errors.append("Dir Codeudor")
+            return None
+
+    def get_aval_comuna(self, idx) -> Union[str, None]:
+        try:
+            if self.seccion_aval is None:
+                return None
+
+            pattern = re.compile(r'\bcomuna:\s((?:\w+\s)+)')
+            found = pattern.findall(self.seccion_aval)
+
+            if idx >= len(found): 
+                return None
+        
+            return found[idx].strip().title()
+            
+        except Exception as e:
+            logging.error('{} error: {}'.format(
+                PagareTextProcessor.get_aval_domicilio.__qualname__, e))
+            self.errors.append("Comuna Codeudor")
+            return None
+
 
 class PagareProcessor(Processor):
     def process_response(self, response: Dict[str, Any], parsed_key: Dict[str, str]) -> pd.DataFrame:
@@ -341,6 +427,18 @@ class PagareProcessor(Processor):
             "Fecha Pago Primera Cuota": self.processed_text.get_fecha_pago_primera_cuota(),
             "Día de pago": self.processed_text.get_dia_pago(),
             "Valor Última Cuota": self.processed_text.get_valor_ultima_cuota(),
+            'Codeudor': self.processed_text.get_aval_nombre(0),
+            'Rut Codeudor': self.processed_text.get_aval_rut(0),
+            'Dir Codeudor': self.processed_text.get_aval_domicilio(0),
+            'Comuna Codeudor': self.processed_text.get_aval_comuna(0),
+            'Codeudor2': self.processed_text.get_aval_nombre(1),
+            'Rut Codeudor2': self.processed_text.get_aval_rut(1),
+            'Dir Codeudor2': self.processed_text.get_aval_domicilio(1),
+            'Comuna Codeudor2': self.processed_text.get_aval_comuna(1),
+            'Codeudor3': self.processed_text.get_aval_nombre(2),
+            'Rut Codeudor3': self.processed_text.get_aval_rut(2),
+            'Dir Codeudor3': self.processed_text.get_aval_domicilio(2),
+            'Comuna Codeudor3': self.processed_text.get_aval_comuna(2),
             'Nombre Documento': parsed_key['filename_full'],
             'Errores': ', '.join(self.processed_text.errors),
         }
