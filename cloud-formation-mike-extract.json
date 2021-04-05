@@ -1,0 +1,151 @@
+{
+    "Resources" : {
+        "IAMRoleLambda": {
+            "Type" : "AWS::IAM::Role",
+            "Properties" : {
+                "AssumeRolePolicyDocument" : {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Policies" : [
+                    {
+                        "PolicyName": "PolicyAllowS3System",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [ "s3:*" ],
+                                    "Resource": [
+                                        "arn:aws:s3:::mike-extract-s3-system",
+                                        "arn:aws:s3:::mike-extract-s3-system/*"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "PolicyName": "PolicyAllowSQSMapReduce",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [ "sqs:*" ],
+                                    "Resource": [
+                                        { "Fn::GetAtt" : [ "SQSMapReduce", "Arn" ] }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "RoleName" : "mike-extract-role-system"
+            }
+        },
+        "S3System" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName" : "mike-extract-s3-system",
+                "AccessControl": "Private",    
+                "LifecycleConfiguration": {
+                    "Rules" : [
+                        {
+                            "Id": "MikeCleanup",
+                            "Status": "Enabled",
+                            "ExpirationInDays": "7"
+                        }        
+                    ]
+                },
+                "NotificationConfiguration": {    
+                    "LambdaConfigurations": [
+                        {
+                            "Event" : "s3:ObjectCreated:*",
+                            "Filter" : {
+                                "S3Key": {
+                                    "Rules": [
+                                        { "Name": "prefix", "Value": "Entrada" },
+                                        { "Name": "suffix", "Value": "zip" }
+                                    ]
+                                }
+                            },
+                            "Function": { "Fn::GetAtt" : [ "LambdaFunction01Unpack", "Arn" ] }    
+                        }
+                    ]
+                }
+            }
+        },
+        "S3Archive" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName" : "mike-extract-s3-archive"
+            }
+        },
+        "SQSMapReduce": {
+            "Type" : "AWS::SQS::Queue",
+            "Properties" : {
+                "QueueName" : "mike-extract-sqs-mapreduce"
+            }
+        },
+        "LambdaFunction01Unpack": {
+            "Type" : "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "mike-extract-lambda-01-unpack",    
+                "Role": { "Fn::GetAtt" : [ "IAMRoleLambda", "Arn" ] },
+                "Code" : {
+                    "S3Bucket": "mike-resources-prod",
+                    "S3Key": "ExtractorDeudas/LambdaFunctions/Mike_ExtractorDeudas_01_Map-20210402.zip"
+                },
+                "Layers": [
+                    "arn:aws:lambda:sa-east-1:640010853179:layer:AWSLambda-Python37-SciPy1x:34",
+                    { "Ref": "LambdaLayerPandas" }
+                ],
+                "Handler": "lambda_function.lambda_handler",
+                "Runtime" : "python3.7",
+                "MemorySize": 512,
+                "Timeout": 900
+            }
+        },
+        "LambdaInvoke01Unpack": {
+            "Type" : "AWS::Lambda::EventInvokeConfig",
+            "Properties" : {
+                "DestinationConfig" : {
+                    "OnSuccess" : {
+                        "Destination" : { "Fn::GetAtt" : [ "SQSMapReduce", "Arn" ] }
+                    }                    
+                },
+                "FunctionName" : { "Ref": "LambdaFunction01Unpack" },
+                "Qualifier": "$LATEST"
+            }
+        },
+        "LambdaPermission01Unpack": {
+            "Type" : "AWS::Lambda::Permission",
+            "Properties" : {
+                "Action" : "lambda:InvokeFunction",
+                "FunctionName" : { "Ref": "LambdaFunction01Unpack" },
+                "Principal" : "s3.amazonaws.com",
+                "SourceAccount" : "454177333545",
+                "SourceArn" : "arn:aws:s3:::mike-extract-s3-system"
+            }
+        },        
+        "LambdaLayerPandas": {
+            "Type" : "AWS::Lambda::LayerVersion",
+            "Properties" : {
+                "Content" : {
+                    "S3Bucket": "mike-resources-prod",
+                    "S3Key": "ExtractorDeudas/LambdaLayers/pandas-20210402.zip"
+                },
+                "Description" : "Layer con Pandas Python",
+                "LayerName" : "pandas"
+              }
+        }        
+    }
+}
