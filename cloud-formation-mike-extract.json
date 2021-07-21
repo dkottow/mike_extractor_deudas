@@ -1,151 +1,1097 @@
 {
-    "Resources" : {
-        "IAMRoleLambda": {
-            "Type" : "AWS::IAM::Role",
-            "Properties" : {
-                "AssumeRolePolicyDocument" : {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {
-                                "Service": "lambda.amazonaws.com"
-                            },
-                            "Action": "sts:AssumeRole"
-                        }
-                    ]
-                },
-                "Policies" : [
+  "Resources": {
+    "IAMRoleLambda": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "Description": "Roles para Mike",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "MikeS3ArchiveSimpleAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:PutObjectAcl"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::mike-extract-s3-archive-prod",
+                    "arn:aws:s3:::mike-extract-s3-archive-prod/*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "MikeS3SystemSimpleAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObjectAcl",
+                    "s3:GetObject",
+                    "s3:ListBucket",
+                    "s3:DeleteObject",
+                    "s3:PutObjectAcl"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::mike-extract-s3-system-prod",
+                    "arn:aws:s3:::mike-extract-s3-system-prod/*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "MikeSQSMapReduceSimpleAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:DeleteMessage",
+                    "sqs:SendMessageBatch",
+                    "sqs:ReceiveMessage",
+                    "sqs:SendMessage",
+                    "sqs:GetQueueAttributes"
+                  ],
+                  "Resource": [
                     {
-                        "PolicyName": "PolicyAllowS3System",
-                        "PolicyDocument": {
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [ "s3:*" ],
-                                    "Resource": [
-                                        "arn:aws:s3:::mike-extract-s3-system",
-                                        "arn:aws:s3:::mike-extract-s3-system/*"
-                                    ]
-                                }
-                            ]
-                        }
+                      "Fn::GetAtt": [
+                        "SQSMapReduce",
+                        "Arn"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "MikeSESSendEmail",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ses:SendEmail",
+                    "ses:SendTemplatedEmail",
+                    "ses:SendRawEmail"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "MikeTextractFullAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "textract:*"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ],
+        "RoleName": "mike-extract-role-system"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "dcddb6ad-3f58-449f-802a-9b5069fd0a26"
+        }
+      }
+    },
+    "S3System": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "mike-extract-s3-system-prod",
+        "AccessControl": "Private",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "Id": "MikeCleanup",
+              "Status": "Enabled",
+              "ExpirationInDays": "7"
+            }
+          ]
+        },
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [
+            {
+              "Event": "s3:ObjectCreated:*",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "prefix",
+                      "Value": "Entrada"
                     },
                     {
-                        "PolicyName": "PolicyAllowSQSMapReduce",
-                        "PolicyDocument": {
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [ "sqs:*" ],
-                                    "Resource": [
-                                        { "Fn::GetAtt" : [ "SQSMapReduce", "Arn" ] }
-                                    ]
-                                }
-                            ]
-                        }
+                      "Name": "suffix",
+                      "Value": ".zip"
                     }
-                ],
-                "RoleName" : "mike-extract-role-system"
-            }
-        },
-        "S3System" : {
-            "Type" : "AWS::S3::Bucket",
-            "Properties": {
-                "BucketName" : "mike-extract-s3-system",
-                "AccessControl": "Private",    
-                "LifecycleConfiguration": {
-                    "Rules" : [
-                        {
-                            "Id": "MikeCleanup",
-                            "Status": "Enabled",
-                            "ExpirationInDays": "7"
-                        }        
-                    ]
-                },
-                "NotificationConfiguration": {    
-                    "LambdaConfigurations": [
-                        {
-                            "Event" : "s3:ObjectCreated:*",
-                            "Filter" : {
-                                "S3Key": {
-                                    "Rules": [
-                                        { "Name": "prefix", "Value": "Entrada" },
-                                        { "Name": "suffix", "Value": "zip" }
-                                    ]
-                                }
-                            },
-                            "Function": { "Fn::GetAtt" : [ "LambdaFunction01Unpack", "Arn" ] }    
-                        }
-                    ]
+                  ]
                 }
-            }
-        },
-        "S3Archive" : {
-            "Type" : "AWS::S3::Bucket",
-            "Properties": {
-                "BucketName" : "mike-extract-s3-archive"
-            }
-        },
-        "SQSMapReduce": {
-            "Type" : "AWS::SQS::Queue",
-            "Properties" : {
-                "QueueName" : "mike-extract-sqs-mapreduce"
-            }
-        },
-        "LambdaFunction01Unpack": {
-            "Type" : "AWS::Lambda::Function",
-            "Properties": {
-                "FunctionName": "mike-extract-lambda-01-unpack",    
-                "Role": { "Fn::GetAtt" : [ "IAMRoleLambda", "Arn" ] },
-                "Code" : {
-                    "S3Bucket": "mike-resources-prod",
-                    "S3Key": "ExtractorDeudas/LambdaFunctions/Mike_ExtractorDeudas_01_Map-20210402.zip"
-                },
-                "Layers": [
-                    "arn:aws:lambda:sa-east-1:640010853179:layer:AWSLambda-Python37-SciPy1x:34",
-                    { "Ref": "LambdaLayerPandas" }
-                ],
-                "Handler": "lambda_function.lambda_handler",
-                "Runtime" : "python3.7",
-                "MemorySize": 512,
-                "Timeout": 900
-            }
-        },
-        "LambdaInvoke01Unpack": {
-            "Type" : "AWS::Lambda::EventInvokeConfig",
-            "Properties" : {
-                "DestinationConfig" : {
-                    "OnSuccess" : {
-                        "Destination" : { "Fn::GetAtt" : [ "SQSMapReduce", "Arn" ] }
-                    }                    
-                },
-                "FunctionName" : { "Ref": "LambdaFunction01Unpack" },
-                "Qualifier": "$LATEST"
-            }
-        },
-        "LambdaPermission01Unpack": {
-            "Type" : "AWS::Lambda::Permission",
-            "Properties" : {
-                "Action" : "lambda:InvokeFunction",
-                "FunctionName" : { "Ref": "LambdaFunction01Unpack" },
-                "Principal" : "s3.amazonaws.com",
-                "SourceAccount" : "454177333545",
-                "SourceArn" : "arn:aws:s3:::mike-extract-s3-system"
-            }
-        },        
-        "LambdaLayerPandas": {
-            "Type" : "AWS::Lambda::LayerVersion",
-            "Properties" : {
-                "Content" : {
-                    "S3Bucket": "mike-resources-prod",
-                    "S3Key": "ExtractorDeudas/LambdaLayers/pandas-20210402.zip"
-                },
-                "Description" : "Layer con Pandas Python",
-                "LayerName" : "pandas"
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "LambdaFunction01Unpack",
+                  "Arn"
+                ]
               }
-        }        
+            },
+            {
+              "Event": "s3:ObjectCreated:*",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "prefix",
+                      "Value": "Intermedio/01_Extract"
+                    },
+                    {
+                      "Name": "suffix",
+                      "Value": ".pdf"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "LambdaFunction02PDFToDescriptor",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:*",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "prefix",
+                      "Value": "Intermedio/02_PDF2Descriptor"
+                    },
+                    {
+                      "Name": "suffix",
+                      "Value": ".json"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "LambdaFunction03ClassifyDoctype",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:*",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "prefix",
+                      "Value": "Intermedio/03_Classification"
+                    },
+                    {
+                      "Name": "suffix",
+                      "Value": ".json"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "LambdaFunction04Textract",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:*",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "prefix",
+                      "Value": "Intermedio/04_Textract"
+                    },
+                    {
+                      "Name": "suffix",
+                      "Value": ".json"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "LambdaFunction05Processors",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "mike"
+          },
+          {
+            "Key": "phase",
+            "Value": "prod"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "25e36cfe-29cf-4e24-8361-821e164c81a8"
+        }
+      }
+    },
+    "S3Archive": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "mike-extract-s3-archive-prod",
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "mike"
+          },
+          {
+            "Key": "phase",
+            "Value": "prod"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "d3c6c829-324e-4a7e-969c-448c7a2fdb13"
+        }
+      }
+    },
+    "SQSMapReduce": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "mike-extract-sqs-mapreduce-prod",
+        "DelaySeconds": 120,
+        "VisibilityTimeout": 300,
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "mike"
+          },
+          {
+            "Key": "phase",
+            "Value": "prod"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "9a39cc88-2e9c-4a7a-a0e4-09f11b4694cb"
+        }
+      }
+    },
+    "LambdaFunction01Unpack": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Code": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaFunctions/mike_extract_01_unpack.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IAMRoleLambda",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.7",
+        "FunctionName": "mike-extract-01-unpack",
+        "MemorySize": 512,
+        "Timeout": 900,
+        "Layers": [
+          "arn:aws:lambda:sa-east-1:640010853179:layer:AWSLambda-Python37-SciPy1x:34",
+          {
+            "Ref": "LambdaLayerPandas"
+          }
+        ],
+        "Description": "Extrae los docs desde un desde el comprimido de entrada e inicia un proceso de deteccion de deudas para cada uno de estos.",
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "mike"
+          },
+          {
+            "Key": "phase",
+            "Value": "prod"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "aaee03f1-431a-4adb-9cc4-689f8291935d"
+        }
+      }
+    },
+    "LambdaInvoke01Unpack": {
+      "Type": "AWS::Lambda::EventInvokeConfig",
+      "Properties": {
+        "DestinationConfig": {
+          "OnSuccess": {
+            "Destination": {
+              "Fn::GetAtt": [
+                "SQSMapReduce",
+                "Arn"
+              ]
+            }
+          }
+        },
+        "FunctionName": {
+          "Ref": "LambdaFunction01Unpack"
+        },
+        "Qualifier": "$LATEST"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "621b0e64-3376-45ec-a451-a4d735a48f20"
+        }
+      }
+    },
+    "LambdaPermission01Unpack": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction01Unpack"
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": "arn:aws:s3:::mike-extract-s3-system-prod"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "e6f7753f-6cee-4012-ac2f-d0d6b6afd89e"
+        }
+      }
+    },
+    "LambdaFunction02PDFToDescriptor": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Code": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaFunctions/mike_extract_02_PDF_to_descriptor.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IAMRoleLambda",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.7",
+        "FunctionName": "mike-extract-02-pdf_to_descriptor",
+        "MemorySize": 4096,
+        "Timeout": 300,
+        "Description": "Convierte la primera pagina de un PDF a imagen y luego calcula y retorna un descriptor de imagen (HOG) de esta.",
+        "Layers": [
+          "arn:aws:lambda:sa-east-1:640010853179:layer:AWSLambda-Python37-SciPy1x:34",
+          {
+            "Ref": "LambdaLayerOpenCVHeadless"
+          },
+          {
+            "Ref": "LambdaLayerPoppler"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "mike"
+          },
+          {
+            "Key": "phase",
+            "Value": "prod"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "4157e034-1e45-46c5-aaae-480fb7d946d7"
+        }
+      }
+    },
+    "LambdaPermission02PDFToDescriptor": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction02PDFToDescriptor"
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": "arn:aws:s3:::mike-extract-s3-system-prod"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "228ea30d-0514-48a4-8c07-6652934127a5"
+        }
+      }
+    },
+    "LambdaFunction03ClassifyDoctype": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Code": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaFunctions/mike_extract_03_classify_doctype.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IAMRoleLambda",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.7",
+        "FunctionName": "mike-extract-03-classify-doctype",
+        "MemorySize": 512,
+        "Timeout": 300,
+        "Description": "Dado un descriptor de imagen de la primera pagina de un documento, clasifica su tipo de documento.",
+        "Layers": [
+          "arn:aws:lambda:sa-east-1:640010853179:layer:AWSLambda-Python37-SciPy1x:34",
+          {
+            "Ref": "LambdaLayerScikitLearn"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "mike"
+          },
+          {
+            "Key": "phase",
+            "Value": "prod"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "f376d72a-9af0-4375-876f-9408a9b0dc2a"
+        }
+      }
+    },
+    "LambdaPermission03ClassifyDoctype": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction03ClassifyDoctype"
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": "arn:aws:s3:::mike-extract-s3-system-prod"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "2b4c3a0c-1f1a-439a-a9b3-cd9d3ff0c629"
+        }
+      }
+    },
+    "LambdaFunction04Textract": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Code": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaFunctions/mike_extract_04_textract.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IAMRoleLambda",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.7",
+        "FunctionName": "mike-extract-04-textract",
+        "MemorySize": 128,
+        "Timeout": 900,
+        "Description": "Ejecuta textract sobre un documento PDF y retorna el texto detectado.",
+        "Layers": [
+          "arn:aws:lambda:sa-east-1:640010853179:layer:AWSLambda-Python37-SciPy1x:34",
+          {
+            "Ref": "LambdaLayerPandas"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "mike"
+          },
+          {
+            "Key": "phase",
+            "Value": "prod"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "1b47fdbb-0378-48d6-8171-17a8998a8138"
+        }
+      }
+    },
+    "LambdaPermission04Textract": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction04Textract"
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": "arn:aws:s3:::mike-extract-s3-system-prod"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5f5a2a33-6ba0-4829-8f03-cddbfe8f24fc"
+        }
+      }
+    },
+    "LambdaFunction05Processors": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Code": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaFunctions/mike_extract_05_processors.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IAMRoleLambda",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.7",
+        "FunctionName": "mike-extract-05-processors",
+        "MemorySize": 256,
+        "Timeout": 60,
+        "Description": "Dado el texto de un documento, extrae la deuda o los datos contenidos en este.",
+        "Layers": [
+          "arn:aws:lambda:sa-east-1:640010853179:layer:AWSLambda-Python37-SciPy1x:34",
+          {
+            "Ref": "LambdaLayerPandas"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "mike"
+          },
+          {
+            "Key": "phase",
+            "Value": "prod"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5367f646-66f8-468c-8994-721bd9893313"
+        }
+      }
+    },
+    "LambdaPermission05Processors": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction05Processors"
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": "arn:aws:s3:::mike-extract-s3-system-prod"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "3651feb2-9bac-42d0-aa4e-a22a653a249e"
+        }
+      }
+    },
+    "LambdaFunction10Reduce": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Code": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaFunctions/mike_extract_10_reduce.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IAMRoleLambda",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.7",
+        "FunctionName": "mike-extract-10-reduce",
+        "MemorySize": 256,
+        "Timeout": 300,
+        "Description": "Reduce los resultados de las detecciones a un Excel de salida.",
+        "Layers": [
+          "arn:aws:lambda:sa-east-1:640010853179:layer:AWSLambda-Python37-SciPy1x:34",
+          {
+            "Ref": "LambdaLayerPandas"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "mike"
+          },
+          {
+            "Key": "phase",
+            "Value": "prod"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "c091ae5b-8ec9-49fa-ac7e-212a01611fd2"
+        }
+      }
+    },
+    "LambdaPermission10Reduce": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction10Reduce"
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "S3System",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "05419ae8-cd43-4434-9fac-3431113dfb86"
+        }
+      }
+    },
+    "LambdaEventSourceMapping10ReduceSQSMapReduce": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "BatchSize": 10,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "SQSMapReduce",
+            "Arn"
+          ]
+        },
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaFunction10Reduce",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "a2b24050-8e0a-40ee-8d39-9a7c8c475547"
+        }
+      }
+    },
+    "LambdaLayerPandas": {
+      "Type": "AWS::Lambda::LayerVersion",
+      "Properties": {
+        "Content": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaLayers/pandas.zip"
+        },
+        "Description": "Layer con Pandas Python",
+        "LayerName": "pandas"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "31f2baf0-8faa-4e9e-8aa6-17d0c503b8d3"
+        }
+      }
+    },
+    "LambdaLayerOpenCVHeadless": {
+      "Type": "AWS::Lambda::LayerVersion",
+      "Properties": {
+        "Content": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaLayers/opencv_python_headless.zip"
+        },
+        "Description": "Layer con OpenCV Headless",
+        "LayerName": "opencv-headless"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "8687a0af-e95f-46f6-99a4-c4181ac9b53e"
+        }
+      }
+    },
+    "LambdaLayerPoppler": {
+      "Type": "AWS::Lambda::LayerVersion",
+      "Properties": {
+        "Content": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaLayers/poppler.zip"
+        },
+        "Description": "Layer con Poppler",
+        "LayerName": "poppler"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "29bad0b9-0f15-41f8-a485-1d56806f7b9a"
+        }
+      }
+    },
+    "LambdaLayerScikitLearn": {
+      "Type": "AWS::Lambda::LayerVersion",
+      "Properties": {
+        "Content": {
+          "S3Bucket": "mike-resources-prod",
+          "S3Key": "ExtractorDeudas/LambdaLayers/scikit_learn.zip"
+        },
+        "Description": "Layer con Scikit-Learn",
+        "LayerName": "scikit-learn"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "a04ab17b-c89f-4c8e-ae31-65cccd89400f"
+        }
+      }
     }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "5367f646-66f8-468c-8994-721bd9893313": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 530,
+          "y": 60
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "1b47fdbb-0378-48d6-8171-17a8998a8138": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 390,
+          "y": 60
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "f376d72a-9af0-4375-876f-9408a9b0dc2a": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 250,
+          "y": 60
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "c091ae5b-8ec9-49fa-ac7e-212a01611fd2": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 640,
+          "y": 60
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "d3c6c829-324e-4a7e-969c-448c7a2fdb13": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 350,
+          "y": 310
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "a04ab17b-c89f-4c8e-ae31-65cccd89400f": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 250,
+          "y": -20
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "29bad0b9-0f15-41f8-a485-1d56806f7b9a": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 160,
+          "y": -20
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "8687a0af-e95f-46f6-99a4-c4181ac9b53e": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 160,
+          "y": -80
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "dcddb6ad-3f58-449f-802a-9b5069fd0a26": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 330,
+          "y": -180
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "4157e034-1e45-46c5-aaae-480fb7d946d7": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 110,
+          "y": 60
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "aaee03f1-431a-4adb-9cc4-689f8291935d": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -30,
+          "y": 60
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "621b0e64-3376-45ec-a451-a4d735a48f20": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -30,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "31f2baf0-8faa-4e9e-8aa6-17d0c503b8d3": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 340,
+          "y": -20
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "a2b24050-8e0a-40ee-8d39-9a7c8c475547": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 660,
+          "y": 220
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "9a39cc88-2e9c-4a7a-a0e4-09f11b4694cb": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 460,
+          "y": 310
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "25e36cfe-29cf-4e24-8361-821e164c81a8": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 250,
+          "y": 310
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "05419ae8-cd43-4434-9fac-3431113dfb86": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 640,
+          "y": 130
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "c091ae5b-8ec9-49fa-ac7e-212a01611fd2"
+        ]
+      },
+      "3651feb2-9bac-42d0-aa4e-a22a653a249e": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 530,
+          "y": 130
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "5367f646-66f8-468c-8994-721bd9893313"
+        ]
+      },
+      "5f5a2a33-6ba0-4829-8f03-cddbfe8f24fc": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 390,
+          "y": 130
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "1b47fdbb-0378-48d6-8171-17a8998a8138"
+        ]
+      },
+      "2b4c3a0c-1f1a-439a-a9b3-cd9d3ff0c629": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 250,
+          "y": 130
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "f376d72a-9af0-4375-876f-9408a9b0dc2a"
+        ]
+      },
+      "228ea30d-0514-48a4-8c07-6652934127a5": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 110,
+          "y": 130
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "4157e034-1e45-46c5-aaae-480fb7d946d7"
+        ]
+      },
+      "e6f7753f-6cee-4012-ac2f-d0d6b6afd89e": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -30,
+          "y": 130
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "aaee03f1-431a-4adb-9cc4-689f8291935d"
+        ]
+      }
+    }
+  }
 }

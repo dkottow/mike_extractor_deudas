@@ -1,0 +1,21 @@
+{
+    "editor.formatOnSave": true,
+    "python.linting.enabled": true,
+    "python.formatting.provider": "black",
+    "python.linting.lintOnSave": true,
+    "python.linting.mypyEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.formatting.blackArgs": [
+        "--line-length",
+        "119"
+    ],
+    "editor.rulers": [
+        120
+    ],
+    "python.testing.pytestArgs": [
+        ".",
+        "--ignore=./aws_lambda_layers"
+    ],
+}
