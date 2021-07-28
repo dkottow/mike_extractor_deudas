@@ -98,7 +98,9 @@ def main(event: dict, context):
 
             # ---------------------------------------------------------------------------------------------------------
             # Subir resultados.
-            output_key = MikeKey(input_key.to_str(new_etapa_intermedio="02_PDF2Descriptor", new_extension="json"))
+            output_key = MikeKey(
+                input_key.to_str(new_etapa_intermedio=config.INTER_02_PDF2DESCRIPTOR, new_extension="json")
+            )
             payload = {
                 "success": True,
                 "doc_key": input_key.to_str(),
@@ -121,7 +123,7 @@ def main(event: dict, context):
         logger.exception(msg)
 
         payload = {
-            "step": "PDF2Descriptor",
+            "step": config.AWS_FUNCTION_NAME,
             "key": input_raw_key,
             "exception": str(e),
             "event": event,

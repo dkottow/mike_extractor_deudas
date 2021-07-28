@@ -37,6 +37,46 @@
             }
           },
           {
+            "PolicyName": "MikeS3SNSTextractTopics",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sns:DeleteTopic",
+                    "sns:CreateTopic",
+                    "sns:TagResource",
+                    "sns:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "MikeSQSTextractQueues",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:SendMessage",
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
+                    "sqs:CreateQueue",
+                    "sqs:GetQueueUrl",
+                    "sqs:GetQueueAttributes",
+                    "sqs:SetQueueAttributes",
+                    "sqs:DeleteQueue"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          },
+          {
             "PolicyName": "MikeS3SystemSimpleAccess",
             "PolicyDocument": {
               "Version": "2012-10-17",
@@ -110,10 +150,10 @@
               "Version": "2012-10-17",
               "Statement": [
                 {
-                  "Effect": "Allow",
                   "Action": [
-                    "textract:*"
+                    "sns:*"
                   ],
+                  "Effect": "Allow",
                   "Resource": "*"
                 }
               ]

@@ -54,12 +54,12 @@ def pdf2descriptor_base_test(expected_output: dict, test_key: MikeKey, output_ke
 
 def test_pdf2descriptor_with_forum_cav(s3_client):
 
-    test_key = MikeKey("Intermedio/01_Extract/Forum/Test/CAMILA_SEGUEL_-_CAV.pdf")
-    output_key = MikeKey(test_key.to_str(new_etapa_intermedio="02_PDF2Descriptor", new_extension="json"))
+    test_key = MikeKey(f"Intermedio/{config.INTER_01_EXTRACT}/Forum/Test/CAMILA_SEGUEL_-_CAV.pdf")
+    output_key = MikeKey(test_key.to_str(new_etapa_intermedio=config.INTER_02_PDF2DESCRIPTOR, new_extension="json"))
 
     expected_output = {
         "success": True,
-        "doc_key": "Intermedio/01_Extract/Forum/Test/CAMILA_SEGUEL_-_CAV.pdf",
+        "doc_key": f"Intermedio/{config.INTER_01_EXTRACT}/Forum/Test/CAMILA_SEGUEL_-_CAV.pdf",
         "descriptor": [
             0.0,
             0.0,
@@ -133,12 +133,12 @@ def test_pdf2descriptor_with_forum_cav(s3_client):
 
 def test_pdf2descriptor_with_forum_pagare(s3_client):
 
-    test_key = MikeKey("Intermedio/01_Extract/Forum/Test/CAMILA_SEGUEL_-_PAGARE.pdf")
-    output_key = MikeKey(test_key.to_str(new_etapa_intermedio="02_PDF2Descriptor", new_extension="json"))
+    test_key = MikeKey(f"Intermedio/{config.INTER_01_EXTRACT}/Forum/Test/CAMILA_SEGUEL_-_PAGARE.pdf")
+    output_key = MikeKey(test_key.to_str(new_etapa_intermedio=config.INTER_02_PDF2DESCRIPTOR, new_extension="json"))
 
     expected_output = {
         "success": True,
-        "doc_key": "Intermedio/01_Extract/Forum/Test/CAMILA_SEGUEL_-_PAGARE.pdf",
+        "doc_key": f"Intermedio/{config.INTER_01_EXTRACT}/Forum/Test/CAMILA_SEGUEL_-_PAGARE.pdf",
         "descriptor": [
             0.0,
             0.0,
@@ -212,12 +212,12 @@ def test_pdf2descriptor_with_forum_pagare(s3_client):
 
 def test_pdf2descriptor_with_forum_tabla(s3_client):
 
-    test_key = MikeKey("Intermedio/01_Extract/Forum/Test/CAMILA_SEGUEL_-_TABLA.pdf")
-    output_key = MikeKey(test_key.to_str(new_etapa_intermedio="02_PDF2Descriptor", new_extension="json"))
+    test_key = MikeKey(f"Intermedio/{config.INTER_01_EXTRACT}/Forum/Test/CAMILA_SEGUEL_-_TABLA.pdf")
+    output_key = MikeKey(test_key.to_str(new_etapa_intermedio=config.INTER_02_PDF2DESCRIPTOR, new_extension="json"))
 
     expected_output = {
         "success": True,
-        "doc_key": "Intermedio/01_Extract/Forum/Test/CAMILA_SEGUEL_-_TABLA.pdf",
+        "doc_key": f"Intermedio/{config.INTER_01_EXTRACT}/Forum/Test/CAMILA_SEGUEL_-_TABLA.pdf",
         "descriptor": [
             0.0,
             0.0,
@@ -291,12 +291,12 @@ def test_pdf2descriptor_with_forum_tabla(s3_client):
 
 def test_pdf2descriptor_with_santander_pagare(s3_client):
 
-    test_key = MikeKey("Intermedio/01_Extract/Santander/Test/CRISTOBAL_TRONCOSO_TRONCOSO_-_PAGARE.pdf")
-    output_key = MikeKey(test_key.to_str(new_etapa_intermedio="02_PDF2Descriptor", new_extension="json"))
+    test_key = MikeKey(f"Intermedio/{config.INTER_01_EXTRACT}/Santander/Test/CRISTOBAL_TRONCOSO_TRONCOSO_-_PAGARE.pdf")
+    output_key = MikeKey(test_key.to_str(new_etapa_intermedio=config.INTER_02_PDF2DESCRIPTOR, new_extension="json"))
 
     expected_output = {
         "success": True,
-        "doc_key": "Intermedio/01_Extract/Santander/Test/CRISTOBAL_TRONCOSO_TRONCOSO_-_PAGARE.pdf",
+        "doc_key": f"Intermedio/{config.INTER_01_EXTRACT}/Santander/Test/CRISTOBAL_TRONCOSO_TRONCOSO_-_PAGARE.pdf",
         "descriptor": [
             22709.46775817871,
             268.6372979879379,
@@ -371,12 +371,12 @@ def test_pdf2descriptor_with_santander_pagare(s3_client):
 
 def test_pdf2descriptor_with_santander_tabla(s3_client):
 
-    test_key = MikeKey("Intermedio/01_Extract/Santander/Test/CRISTOBAL_TRONCOSO_TRONCOSO_-_TABLA.pdf")
-    output_key = MikeKey(test_key.to_str(new_etapa_intermedio="02_PDF2Descriptor", new_extension="json"))
+    test_key = MikeKey(f"Intermedio/{config.INTER_01_EXTRACT}/Santander/Test/CRISTOBAL_TRONCOSO_TRONCOSO_-_TABLA.pdf")
+    output_key = MikeKey(test_key.to_str(new_etapa_intermedio=config.INTER_02_PDF2DESCRIPTOR, new_extension="json"))
 
     expected_output = {
         "success": True,
-        "doc_key": "Intermedio/01_Extract/Santander/Test/CRISTOBAL_TRONCOSO_TRONCOSO_-_TABLA.pdf",
+        "doc_key": f"Intermedio/{config.INTER_01_EXTRACT}/Santander/Test/CRISTOBAL_TRONCOSO_TRONCOSO_-_TABLA.pdf",
         "descriptor": [
             0.0,
             0.0,
@@ -451,12 +451,12 @@ def test_pdf2descriptor_with_santander_tabla(s3_client):
 
 def test_pdf2descriptor_with_santander_tabla_2(s3_client):
 
-    test_key = MikeKey("Intermedio/01_Extract/Santander/Test/MAN_WHA_KIM_-_TABLA.pdf")
-    output_key = MikeKey(test_key.to_str(new_etapa_intermedio="02_PDF2Descriptor", new_extension="json"))
+    test_key = MikeKey(f"Intermedio/{config.INTER_01_EXTRACT}/Santander/Test/MAN_WHA_KIM_-_TABLA.pdf")
+    output_key = MikeKey(test_key.to_str(new_etapa_intermedio=config.INTER_02_PDF2DESCRIPTOR, new_extension="json"))
 
     expected_output = {
         "success": True,
-        "doc_key": "Intermedio/01_Extract/Santander/Test/MAN_WHA_KIM_-_TABLA.pdf",
+        "doc_key": f"Intermedio/{config.INTER_01_EXTRACT}/Santander/Test/MAN_WHA_KIM_-_TABLA.pdf",
         "descriptor": [
             0.0,
             0.0,
@@ -530,6 +530,8 @@ def test_pdf2descriptor_with_santander_tabla_2(s3_client):
 
 
 def test_pdf2descriptor_exceptions():
-    event = {"Records": [{"s3": {"object": {"key": "Intermedio/01_Extract/Forum/Test/some_file.nopdf"}}}]}
+    event = {
+        "Records": [{"s3": {"object": {"key": f"Intermedio/{config.INTER_01_EXTRACT}/Forum/Test/some_file.nopdf"}}}]
+    }
     with pytest.raises(Exception, match=r"\[.*\] Exception: The provided file is not a pdf."):
         lambda_handler(event, "")
